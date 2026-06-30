@@ -5,6 +5,9 @@ var Lumix = require('./Lumix');
 
 var canvas = document.querySelector('#canvas');
 var context = canvas.getContext('2d');
+var captureButton = document.querySelector('#captureButton');
+var countdownElement = document.querySelector('#countdown');
+var flashElement = document.querySelector('#flash');
 
 class Controller {
   constructor() {
@@ -24,30 +27,55 @@ class Controller {
     this.frameTimeSum = 0;
     this.frameCount = 0;
 
+    // Elements
+    this.captureButton = document.getElementById('captureButton');
+    this.countdownElement = document.getElementById('countdown');
+    this.flashElement = document.getElementById('flash');
+
     //Attach events
-    $('.capture').click(() => this.startCountdown());
+    captureButton.addEventListener('click', () => this.startCountdown());
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        e.preventDefault();
+        this.startCountdown();
+      }
+    });
 
     this.render();
   }
 
   startCountdown() {
-    if (this.isCountingDown) return;
+    if (this.isCountingDown || captureButton.disabled) return;
     this.isCountingDown = true;
 
     var count = 3;
-    captureButton.disabled = true;
-    captureButton.textContent = '🎂 Preparing...';
+    if (this.captureButton) {
+      this.captureButton.disabled = true;
+      this.captureButton.textContent = "🎂 Preparing...";
+    }
 
     countdownElement.classList.remove('hidden');
+    countdownElement.classList.remove('pulse-animation');
+    void countdownElement.offsetWidth; // Force reflow
+    countdownElement.classList.add('pulse-animation');
     countdownElement.textContent = count;
 
     var interval = setInterval(() => {
       count--;
       if (count > 0) {
         countdownElement.textContent = count;
+        countdownElement.classList.remove('pulse-animation');
+        void countdownElement.offsetWidth; // Force reflow
+        countdownElement.classList.add('pulse-animation');
       } else {
         clearInterval(interval);
-        countdownElement.classList.add('hidden');
+        if (this.countdownElement) {
+          this.countdownElement.classList.add('hidden');
+        }
         this.isCountingDown = false;
         this.triggerFlash();
         this.capture();
@@ -56,14 +84,16 @@ class Controller {
   }
 
   triggerFlash() {
-    flashElement.classList.remove('hidden');
-    flashElement.classList.add('flash-animation');
+    if (this.flashElement) {
+      this.flashElement.classList.remove('hidden');
+      this.flashElement.classList.add('flash-animation');
 
-    // Remove class and hide after animation completes
-    setTimeout(() => {
-      flashElement.classList.remove('flash-animation');
-      flashElement.classList.add('hidden');
-    }, 500);
+      // Remove class and hide after animation completes
+      setTimeout(() => {
+        this.flashElement.classList.remove('flash-animation');
+        this.flashElement.classList.add('hidden');
+      }, 500);
+    }
   }
 
   render() {
@@ -112,46 +142,61 @@ class Controller {
   }
 
   capture() {
-    console.log('Capture Start');
-    captureButton.disabled = true;
-    captureButton.textContent = '🎂 Capturing...';
+    this.captureButton.disabled = true;
+    this.captureButton.textContent = "🎂 Capturing...";
 
-    this.camera.capture((err, ok) => {
-      console.log('Capture Attempt');
-      if (err) {
-        console.log('Failed to take a picture');
-        captureButton.disabled = false;
-        captureButton.textContent = 'Capture';
+    this.camera.capture((err, ok)=>{
+      if(err){
+        this.captureButton.disabled = false;
+        this.captureButton.textContent = "Capture";
         return;
       }
 
       // Attempt to download last photo taken
       this.attempt((cb) => {
         this.camera.getLastPhoto(cb);
-      }, (err, data) => {
-        console.log('Get Last Photo Attempt');
+      }, (err, data)=>{
 
-        captureButton.disabled = false;
-        captureButton.textContent = 'Capture';
+        this.captureButton.disabled = false;
+        this.captureButton.textContent = "Capture";
 
-        if (err) {
-          console.log('Failed to download last photo');
-          if (err.url) {
-            console.log('Last taken URL: ', err.url);
-          }
+        if(err){
+          console.error("Failed to download last photo from camera:", err);
           this.camera.startStream();
-          
           return;
         }
 
         // Save photo
-        var previewImageData = data.toString('base64');
-        console.log('Photo downloaded successfully, length:', previewImageData.length);
+        console.log("Photo downloaded from camera, starting browser download...");
+        this.downloadImage(data);
         
         this.camera.startStream();
       }, 3);
 
     });
+  }
+
+  downloadImage(data) {
+    const blob = new Blob([data], { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    const now = new Date();
+    const timestamp = now.getFullYear() +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      String(now.getDate()).padStart(2, '0') + '_' +
+      String(now.getHours()).padStart(2, '0') +
+      String(now.getMinutes()).padStart(2, '0') +
+      String(now.getSeconds()).padStart(2, '0');
+
+    a.href = url;
+    a.download = `lumix_capture_${timestamp}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
   }
 
   attempt(fn, callback, tries) {
