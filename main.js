@@ -1,6 +1,8 @@
 'use strict';
 
 const electron = require('electron');
+const path = require('path');
+const url = require('url');
 
 // Module to control application life.
 const app = electron.app;
@@ -25,9 +27,19 @@ function createWindow () {
     }
   });
   // and load the index.html of the app.
-  mainWindow.loadURL('file://' + __dirname + '/app/index.html');
+  mainWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'app/index.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+
+  // Redirect renderer logs to terminal
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    console.log(`[Renderer] ${message}`);
+  });
+
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   mainWindow.setFullScreen(true);
   mainWindow.setMenu(null);
   // Emitted when the window is closed.
