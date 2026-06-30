@@ -5,10 +5,6 @@ var Lumix = require("./Lumix");
 
 var canvas = document.querySelector('#canvas');
 var context = canvas.getContext('2d');
-var previewImageElement = document.querySelector('#previewImage');
-var countdownElement = document.querySelector('#countdown');
-var flashElement = document.querySelector('#flash');
-var captureButton = document.querySelector('.capture');
 
 class Controller {
   constructor() {
@@ -72,6 +68,7 @@ class Controller {
 
   displayImage(imgData) {
     if(imgData){
+      // console.log('Displaying image data, length:', imgData.length);
       this.imageObj.onload = function() {
         context.drawImage(this, 0, 0, this.width, this.height, 0, 0, canvas.width, canvas.height);
       };
@@ -114,8 +111,7 @@ class Controller {
 
         // Save photo
         var previewImageData = data.toString('base64');
-        previewImageElement.src = "data:image/jpg;base64," + previewImageData;
-        console.log("set img", previewImageElement);
+        console.log("Photo downloaded successfully, length:", previewImageData.length);
         
         this.camera.startStream();
       }, 3);

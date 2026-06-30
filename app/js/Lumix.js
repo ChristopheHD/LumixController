@@ -6,7 +6,7 @@ var parseString = require('xml2js').parseString;
 var LumixServer = require('./LumixServer');
 
 var lumixAddress = '192.168.54.1';
-const deviceName = 'DMC-CM1';
+const deviceName = 'DMC-G7';
 const deviceId = '4D454930-0100-1000-8000-F02765BACACE';
 
 const init = '/cam.cgi?mode=accctrl&type=req_acc&value=' + deviceId + '&value2=' + deviceName;
@@ -48,9 +48,10 @@ class Lumix {
         path: path,
       };
 
-      // console.log(options);
-
       let callback = function (response) {
+        if (response.statusCode !== 200) {
+          console.log('Response Status:', response.statusCode, 'from:', options.path);
+        }
         if (cb) {
           if (bin) {
             var data = [];
@@ -73,19 +74,22 @@ class Lumix {
 
       var req = http.request(options, callback);
       req.on('error', function (err) {
-        console.log('HTTP Request Failed');
+        console.log('HTTP Request Failed for', options.path, ':', err.message);
         cb(err);
       });
 
       req.end();
     }catch (e) {
-      console.log(e);
+      console.log('Error in getRequest:', e);
       cb && cb('Get request failed');
     }
   }
 
   sendLumix(path, cb) {
     this.getRequest(path, function (err, str) {
+      if (err) {
+        console.error('Lumix Error for', path, ':', err);
+      }
       if (cb) {
         if (err) {
           return cb(err, str);
