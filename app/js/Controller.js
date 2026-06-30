@@ -32,6 +32,9 @@ class Controller {
     this.countdownElement = document.getElementById('countdown');
     this.flashElement = document.getElementById('flash');
 
+    // Bolt optimization: Bind render once to avoid per-frame allocation
+    this.render = this.render.bind(this);
+
     //Attach events
     captureButton.addEventListener('click', () => this.startCountdown());
     window.addEventListener('keydown', (e) => {
@@ -99,9 +102,13 @@ class Controller {
   render() {
     const startTime = performance.now();
 
-    this.displayImage(this.camera.getPreviewImage());
+    // Bolt optimization: Only process if a new frame has been received.
+    // This reduces CPU/GPU work when the camera's frame rate is lower than the UI's 60fps.
+    if (this.camera.server.count !== this.lastProcessedCount) {
+      this.displayImage(this.camera.getPreviewImage());
+    }
 
-    requestAnimationFrame(this.render.bind(this));
+    requestAnimationFrame(this.render);
 
     // Optional: Log performance periodically
     if (this.frameCount > 0 && this.frameCount % 300 === 0) {
@@ -113,7 +120,7 @@ class Controller {
 
   async displayImage(imgData) {
     // imgData is now a Buffer/Uint8Array
-    if (imgData && !this.isDecoding && this.camera.server.count !== this.lastProcessedCount) {
+    if (imgData && !this.isDecoding) {
       this.isDecoding = true;
       this.lastProcessedCount = this.camera.server.count;
 
@@ -135,9 +142,6 @@ class Controller {
       } finally {
         this.isDecoding = false;
       }
-    } else if (this.currentBitmap) {
-      // If no new data, just redraw the existing bitmap to keep the canvas populated
-      context.drawImage(this.currentBitmap, 0, 0, this.currentBitmap.width, this.currentBitmap.height, 0, 0, canvas.width, canvas.height);
     }
   }
 
