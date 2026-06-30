@@ -5,6 +5,9 @@ var Lumix = require("./Lumix");
 
 var canvas = document.querySelector('#canvas');
 var context = canvas.getContext('2d');
+var captureButton = document.querySelector('#captureButton');
+var countdownElement = document.querySelector('#countdown');
+var flashElement = document.querySelector('#flash');
 
 class Controller {
   constructor() {
@@ -18,14 +21,24 @@ class Controller {
     this.imageObj = new Image();
 
     //Attach events
-    $(".capture").click(()=>this.startCountdown());
+    captureButton.addEventListener('click', () => this.startCountdown());
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        e.preventDefault();
+        this.startCountdown();
+      }
+    });
 
     this.render();
 
   }
 
   startCountdown() {
-    if (this.isCountingDown) return;
+    if (this.isCountingDown || captureButton.disabled) return;
     this.isCountingDown = true;
 
     var count = 3;
@@ -33,12 +46,18 @@ class Controller {
     captureButton.textContent = "🎂 Preparing...";
 
     countdownElement.classList.remove('hidden');
+    countdownElement.classList.remove('pulse-animation');
+    void countdownElement.offsetWidth; // Force reflow
+    countdownElement.classList.add('pulse-animation');
     countdownElement.textContent = count;
 
     var interval = setInterval(() => {
       count--;
       if (count > 0) {
         countdownElement.textContent = count;
+        countdownElement.classList.remove('pulse-animation');
+        void countdownElement.offsetWidth; // Force reflow
+        countdownElement.classList.add('pulse-animation');
       } else {
         clearInterval(interval);
         countdownElement.classList.add('hidden');
