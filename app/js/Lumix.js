@@ -306,7 +306,6 @@ class Lumix {
           setTimeout(function () {
             //DL DO DT prefixes for files
             var jpgUrl = '/DL100' + (contentNumber + global.offsetImageID) + '.jpg';
-            console.log(jpgUrl);
             _this.getBinary(jpgUrl, function (err, result) {
               _this.downloading = false;
               if(err || !result || result.length == 0){
