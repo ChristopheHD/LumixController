@@ -55,7 +55,7 @@ class Controller {
     var count = 3;
     if (this.captureButton) {
       this.captureButton.disabled = true;
-      this.captureButton.textContent = "🎂 Preparing...";
+      this.captureButton.textContent = 'Preparing...';
     }
 
     countdownElement.classList.remove('hidden');
@@ -143,12 +143,12 @@ class Controller {
 
   capture() {
     this.captureButton.disabled = true;
-    this.captureButton.textContent = "🎂 Capturing...";
+    this.captureButton.textContent = 'Capturing...';
 
     this.camera.capture((err, ok)=>{
       if(err){
         this.captureButton.disabled = false;
-        this.captureButton.textContent = "Capture";
+        this.captureButton.textContent = 'Capture';
         return;
       }
 
@@ -158,16 +158,16 @@ class Controller {
       }, (err, data)=>{
 
         this.captureButton.disabled = false;
-        this.captureButton.textContent = "Capture";
+        this.captureButton.textContent = 'Capture';
 
         if(err){
-          console.error("Failed to download last photo from camera:", err);
+          console.error('Failed to download last photo from camera:', err);
           this.camera.startStream();
           return;
         }
 
         // Save photo
-        console.log("Photo downloaded from camera, starting browser download...");
+        console.log('Photo downloaded from camera, starting browser download...');
         this.downloadImage(data);
         
         this.camera.startStream();
