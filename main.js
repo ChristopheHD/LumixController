@@ -34,8 +34,10 @@ function createWindow () {
   }));
 
   // Redirect renderer logs to terminal
-  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
-    console.log(message);
+  mainWindow.webContents.on('console-message', (event) => {
+    // Modern signature: (event: WebContentsConsoleMessageEvent)
+    // event has properties: level, message, line, sourceId
+    console.log(event.message);
   });
 
   // Open the DevTools.

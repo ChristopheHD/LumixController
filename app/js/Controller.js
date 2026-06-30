@@ -113,11 +113,13 @@ class Controller {
         this.captureButton.textContent = "Capture";
 
         if(err){
+          console.error("Failed to download last photo from camera:", err);
           this.camera.startStream();
           return;
         }
 
         // Save photo
+        console.log("Photo downloaded from camera, starting browser download...");
         this.downloadImage(data);
         
         this.camera.startStream();
