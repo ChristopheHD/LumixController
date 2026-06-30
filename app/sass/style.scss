@@ -17,12 +17,80 @@ body {
 #canvas {
   width: 800px;
   height: 600px;
+  display: block;
+}
+
+.viewport {
+  position: relative;
+  width: 800px;
+  height: 600px;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#countdown {
+  color: #fff;
+  font-size: 200px;
+  font-weight: bold;
+  text-shadow: 0 0 20px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+#flash {
+  background-color: #fff;
+  z-index: 20;
+  opacity: 0;
+}
+
+.flash-animation {
+  animation: flash 0.5s ease-out;
+}
+
+@keyframes flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.hidden {
+  display: none;
 }
 
 .capture {
+  background: #ff4081;
+  border: none;
+  border-radius: 50px;
   color: #fff;
+  cursor: pointer;
   font-size: 30px;
+  padding: 15px 40px;
+  transition: transform 0.1s, background-color 0.2s;
+
+  &:hover {
+    background-color: #f50057;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
+
 .previewImageSmall {
   width: 800px;
   height: 600px;

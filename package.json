@@ -7,9 +7,10 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "npm run build:css && electron main.js",
+    "start": "npm run build:css && electron main.js --no-sandbox",
     "build:css": "sass app/sass/style.scss app/css/style.css && postcss app/css/style.css -o app/css/style.css",
-    "watch:css": "sass --watch app/sass/style.scss app/css/style.css"
+    "watch:css": "sass --watch app/sass/style.scss app/css/style.css",
+    "dist": "npm run build:css && electron-builder"
   },
   "keywords": [
     "Electron",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "autoprefixer": "^10.5.2",
     "electron": "^42.5.1",
+    "electron-builder": "^25.1.8",
     "postcss": "^8.5.16",
     "postcss-cli": "^11.0.1",
     "postcss-sort-media-queries": "^6.6.2",
@@ -35,5 +37,15 @@
   "dependencies": {
     "jquery": "^4.0.0",
     "xml2js": "^0.6.2"
+  },
+  "build": {
+    "appId": "com.lumix.photobooth",
+    "productName": "Lumix Photobooth",
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Graphics"
+    }
   }
 }

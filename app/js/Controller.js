@@ -18,10 +18,46 @@ class Controller {
     this.imageObj = new Image();
 
     //Attach events
-    $(".capture").click(()=>this.capture());
+    $(".capture").click(()=>this.startCountdown());
 
     this.render();
 
+  }
+
+  startCountdown() {
+    if (this.isCountingDown) return;
+    this.isCountingDown = true;
+
+    var count = 3;
+    captureButton.disabled = true;
+    captureButton.textContent = "🎂 Preparing...";
+
+    countdownElement.classList.remove('hidden');
+    countdownElement.textContent = count;
+
+    var interval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        countdownElement.textContent = count;
+      } else {
+        clearInterval(interval);
+        countdownElement.classList.add('hidden');
+        this.isCountingDown = false;
+        this.triggerFlash();
+        this.capture();
+      }
+    }, 1000);
+  }
+
+  triggerFlash() {
+    flashElement.classList.remove('hidden');
+    flashElement.classList.add('flash-animation');
+
+    // Remove class and hide after animation completes
+    setTimeout(() => {
+      flashElement.classList.remove('flash-animation');
+      flashElement.classList.add('hidden');
+    }, 500);
   }
 
   render() {
@@ -42,11 +78,15 @@ class Controller {
 
   capture() {
     console.log("Capture Start");
+    captureButton.disabled = true;
+    captureButton.textContent = "🎂 Capturing...";
 
     this.camera.capture((err, ok)=>{
       console.log("Capture Attempt");
       if(err){
         console.log("Failed to take a picture");
+        captureButton.disabled = false;
+        captureButton.textContent = "Capture";
         return;
       }
 
@@ -55,6 +95,9 @@ class Controller {
         this.camera.getLastPhoto(cb);
       }, (err, data)=>{
         console.log("Get Last Photo Attempt");
+
+        captureButton.disabled = false;
+        captureButton.textContent = "Capture";
 
         if(err){
           console.log("Failed to download last photo");
