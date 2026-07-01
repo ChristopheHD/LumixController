@@ -47,6 +47,7 @@ class Controller {
       }
       this.setButtonState('Capture', false);
       this.captureButton.disabled = false;
+      document.querySelectorAll('.shortcut-hint').forEach(el => el.style.visibility = 'visible');
       this.camera.startStream();
     });
 
@@ -218,6 +219,7 @@ class Controller {
         if (global.AUTO_PRINT && filepath) {
           this.captureButton.disabled = true;
           this.setButtonState('Printing...', true);
+          document.querySelectorAll('.shortcut-hint').forEach(el => el.style.visibility = 'hidden');
           ipcRenderer.send('print-image', filepath);
         } else {
           this.captureButton.disabled = false;
