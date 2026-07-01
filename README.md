@@ -38,7 +38,7 @@ Configuration settings can be found and modified in `app/js/config.js`:
   - `CAM_ORG` (Original)
   - `CAM_LRGTN` (Large)
   - `CAM_TN` (Thumbnail)
-- `AUTO_PRINT`: Enables or disables automatic silent printing (default: `true`).
+- `PRINT`: Enables or disables automatic silent printing (default: `true`).
 
 ## Compatibility
 
