@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Photobooth Print</title>
+  <style>
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+    img { width: 100%; height: 100%; object-fit: cover; }
+    @page { margin: 0; size: landscape; }
+  </style>
+</head>
+<body>
+  <img id="print-image" />
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const imagePath = urlParams.get('image');
+    const img = document.getElementById('print-image');
+
+    if (imagePath) {
+      img.src = `file://${imagePath}`;
+      img.onload = () => { window.imgLoaded = true; };
+      img.onerror = () => { window.imgLoaded = 'error'; };
+    } else {
+      window.imgLoaded = 'error';
+    }
+  </script>
+</body>
+</html>

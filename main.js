@@ -58,32 +58,14 @@ ipcMain.on('print-image', (event, imagePath) => {
   let printWindow = new BrowserWindow({
     show: false,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      webSecurity: false // Required to load local file:// from data URL
+      nodeIntegration: false,
+      contextIsolation: true
     }
   });
 
-  const htmlContent = `
-    <html>
-      <head><title>Photobooth Print</title></head>
-      <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-        img { width: 100%; height: 100%; object-fit: cover; }
-        @page { margin: 0; size: landscape; }
-      </style>
-      <body>
-        <img id="print-image" src="file://${imagePath}" />
-        <script>
-          const img = document.getElementById('print-image');
-          img.onload = () => { window.imgLoaded = true; };
-          img.onerror = () => { window.imgLoaded = 'error'; };
-        </script>
-      </body>
-    </html>
-  `;
-
-  printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+  printWindow.loadFile(path.join(__dirname, 'app/print.html'), {
+    query: { image: imagePath }
+  });
 
   printWindow.webContents.on('did-finish-load', async () => {
     // Wait for the image to be fully loaded
