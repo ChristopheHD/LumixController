@@ -26,12 +26,6 @@ Use this to build
 eg. `electron-packager ./ --platform=darwin --arch=x64`
 eg. `electron-packager ./ --platform=linux --arch=arm`
 
-- `PORT`: The UDP port for the camera livestream (default: `49473`).
-- `preferredImageSize`: Sets the image quality to download. Options include:
-  - `CAM_ORG` (Original)
-  - `CAM_LRGTN` (Large)
-  - `CAM_TN` (Thumbnail)
-- `PRINT`: Enables or disables printing (default: `true`).
 
 Notes
 ========
