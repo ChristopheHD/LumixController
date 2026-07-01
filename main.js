@@ -3,6 +3,7 @@
 const electron = require('electron');
 const path = require('path');
 const url = require('url');
+const { ipcMain } = require('electron');
 
 // Module to control application life.
 const app = electron.app;
@@ -52,6 +53,60 @@ function createWindow () {
     mainWindow = null;
   });
 }
+
+ipcMain.on('print-image', (event, imagePath) => {
+  let printWindow = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true
+    }
+  });
+
+  printWindow.loadFile(path.join(__dirname, 'app/print.html'), {
+    query: { image: imagePath }
+  });
+
+  printWindow.webContents.on('did-finish-load', async () => {
+    // Wait for the image to be fully loaded
+    let loaded = false;
+    for (let i = 0; i < 50; i++) { // Max 5 seconds
+      loaded = await printWindow.webContents.executeJavaScript('window.imgLoaded');
+      if (loaded) break;
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    if (loaded === 'error') {
+      console.error('Failed to load image in print window.');
+      printWindow.close();
+      if (mainWindow) {
+        mainWindow.webContents.send('print-finished', false, 'Image load error');
+      }
+      return;
+    }
+
+    printWindow.webContents.print({
+      silent: true,
+      printBackground: true,
+      deviceName: '', // Default printer
+      landscape: true,
+      margins: {
+        marginType: 'none'
+      }
+    }, (success, failureReason) => {
+      if (!success) {
+        console.error('Print failed:', failureReason);
+      } else {
+        console.log('Print job sent successfully.');
+      }
+      printWindow.close();
+      printWindow = null;
+      if (mainWindow) {
+        mainWindow.webContents.send('print-finished', success, failureReason);
+      }
+    });
+  });
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

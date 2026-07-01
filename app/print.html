@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Photobooth Print</title>
+  <style>
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+    img { width: 100%; height: 100%; object-fit: cover; }
+    @page { margin: 0; size: landscape; }
+  </style>
+</head>
+<body>
+  <img id="print-image" />
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const imagePath = urlParams.get('image');
+    const img = document.getElementById('print-image');
+
+    function getSafeLocalImagePath(rawPath) {
+      if (!rawPath) return null;
+      let decodedPath;
+      try {
+        decodedPath = decodeURIComponent(rawPath);
+      } catch (e) {
+        return null;
+      }
+
+      if (decodedPath.includes('\0') || decodedPath.includes('..')) return null;
+      if (!/^\/[A-Za-z0-9._\-\/ ]+\.(png|jpe?g|gif|bmp|webp)$/i.test(decodedPath)) return null;
+      return decodedPath;
+    }
+
+    const safeImagePath = getSafeLocalImagePath(imagePath);
+    if (safeImagePath) {
+      img.src = `file://${safeImagePath}`;
+      img.onload = () => { window.imgLoaded = true; };
+      img.onerror = () => { window.imgLoaded = 'error'; };
+    } else {
+      window.imgLoaded = 'error';
+    }
+  </script>
+</body>
+</html>

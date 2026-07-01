@@ -3,6 +3,7 @@ require('./config');
 var fs = require('fs');
 var path = require('path');
 var $ = require('jquery');
+const { ipcRenderer } = require('electron');
 var Lumix = require('./Lumix');
 
 var canvas = document.querySelector('#canvas');
@@ -36,6 +37,18 @@ class Controller {
 
     // Bolt optimization: Bind render once to avoid per-frame allocation
     this.render = this.render.bind(this);
+
+    // IPC Events
+    ipcRenderer.on('print-finished', (event, success, error) => {
+      if (!success) {
+        console.error('Print failed callback:', error);
+      } else {
+        console.log('Print successful callback.');
+      }
+      this.captureButton.disabled = false;
+      this.captureButton.textContent = 'Capture';
+      this.camera.startStream();
+    });
 
     //Attach events
     captureButton.addEventListener('click', () => this.startCountdown());
@@ -174,9 +187,17 @@ class Controller {
 
         // Save photo
         console.log('Photo downloaded from camera, starting browser download...');
-        this.downloadImage(data);
-        
-        this.camera.startStream();
+        const filepath = this.downloadImage(data);
+
+        if (global.AUTO_PRINT && filepath) {
+          this.captureButton.disabled = true;
+          this.captureButton.textContent = 'Printing...';
+          ipcRenderer.send('print-image', filepath);
+        } else {
+          this.captureButton.disabled = false;
+          this.captureButton.textContent = 'Capture';
+          this.camera.startStream();
+        }
       }, 3);
 
     });
@@ -202,6 +223,7 @@ class Controller {
       const filepath = path.join(capturesDir, filename);
       fs.writeFileSync(filepath, data);
       console.log(`Photo saved successfully to: ${filepath}`);
+      return filepath;
     } catch (e) {
       console.error('Failed to save photo to disk:', e);
 
@@ -217,6 +239,7 @@ class Controller {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
       }, 0);
+      return null;
     }
   }
 
