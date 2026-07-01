@@ -13,13 +13,36 @@ class WifiSetup {
       iface: null // network interface, choose a random one if null
     });
 
-    this.scan();
+    this.isConnecting = false;
+    this.scanInterval = null;
+
+    this.startScanning();
+  }
+
+  startScanning() {
+    this.scan(); // Initial scan
+    this.scanInterval = setInterval(() => {
+      this.scan();
+    }, 5000); // Scan every 5 seconds
+  }
+
+  stopScanning() {
+    if (this.scanInterval) {
+      clearInterval(this.scanInterval);
+      this.scanInterval = null;
+    }
   }
 
   scan() {
-    this.wifiList.innerHTML = '<li>Recherche des réseaux...</li>';
+    if (this.isConnecting) return;
+
+    // Only show "Recherche..." if the list is completely empty
+    if (this.wifiList.children.length === 0) {
+      this.wifiList.innerHTML = '<li>Recherche des réseaux...</li>';
+    }
 
     wifi.scan((error, networks) => {
+      if (this.isConnecting) return;
       if (error) {
         console.error('Erreur lors du scan WiFi:', error);
         this.wifiError.textContent = 'Erreur lors de la recherche des réseaux WiFi.';
@@ -65,6 +88,8 @@ class WifiSetup {
   }
 
   connect(ssid) {
+    this.isConnecting = true;
+    this.stopScanning();
     this.wifiList.innerHTML = `<li>Connexion à ${ssid}...</li>`;
     this.wifiError.classList.add('hidden');
 
@@ -73,7 +98,8 @@ class WifiSetup {
         console.error(`Erreur de connexion à ${ssid}:`, error);
         this.wifiError.textContent = `Erreur de connexion à ${ssid}. Veuillez réessayer.`;
         this.wifiError.classList.remove('hidden');
-        this.scan(); // Refresh the list
+        this.isConnecting = false;
+        this.startScanning(); // Refresh the list and resume background scan
         return;
       }
 
