@@ -103,9 +103,42 @@ class WifiSetup {
         return;
       }
 
-      console.log(`Connecté à ${ssid}`);
-      this.startApp();
+      console.log(`Connecté à ${ssid}. Attente de l'appareil photo...`);
+      this.wifiList.innerHTML = `<li>Attente de l'appareil photo...</li>`;
+      this.waitForCamera();
     });
+  }
+
+  waitForCamera() {
+    const http = require('http');
+    let attempts = 0;
+    const maxAttempts = 30; // 30 seconds
+
+    const checkCamera = () => {
+      attempts++;
+      const req = http.get('http://192.168.54.1:60606/Server0/CDS_control', (res) => {
+        // Any response means the camera is reachable
+        console.log('Caméra détectée !');
+        this.startApp();
+      }).on('error', (err) => {
+        if (attempts >= maxAttempts) {
+          console.error('Impossible de joindre la caméra après connexion WiFi.');
+          this.wifiError.textContent = 'Connexion WiFi réussie, mais appareil photo injoignable.';
+          this.wifiError.classList.remove('hidden');
+          this.isConnecting = false;
+          this.startScanning();
+          return;
+        }
+        setTimeout(checkCamera, 1000);
+      });
+
+      // Add timeout to request
+      req.setTimeout(1000, () => {
+        req.destroy();
+      });
+    };
+
+    checkCamera();
   }
 
   startApp() {
