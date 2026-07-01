@@ -13,3 +13,7 @@
 ## 2025-05-24 - Semantic Roles and Dynamic Status
 **Learning:** Custom interactive elements (like `<li>` elements acting as buttons) require `role="button"` and `tabIndex=0` to be fully accessible to screen readers, preventing them from being read as generic list items. Furthermore, wrapping dynamic status changes in a container with `aria-live="polite"` ensures visually impaired users are kept informed of background updates automatically.
 **Action:** Always verify custom interactive elements have correct semantic roles and use `aria-live` for status text that updates dynamically without user interaction.
+
+## 2025-05-24 - Visual Async Feedback in Photobooth UIs
+**Learning:** In highly physical or constrained environments, textual status updates (like "Searching..." or "Capturing...") may not provide enough visual feedback that an application is actively working, potentially leading to user frustration.
+**Action:** When a button or container goes into a loading or waiting state for a hardware/network action, provide a continuously animated visual cue (like a `.spinner`) alongside the text to clearly indicate ongoing background processing.

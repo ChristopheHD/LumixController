@@ -11,7 +11,7 @@
       <h1>Connect Camera</h1>
       <p id="wifi-error" class="hidden error-text"></p>
       <ul id="wifi-list" class="wifi-list" aria-live="polite">
-        <li>Searching for networks...</li>
+        <li><div class="spinner"></div> Searching for networks...</li>
       </ul>
     </div>
 
@@ -38,7 +38,7 @@
           <p class="shortcut-hint">Press <kbd id="reviewSpaceKey" class="kbd-key">Space</kbd> for new photo</p>
         </div>
       </div>
-      <div id="reviewStatus" class="review-status hidden">Printing...</div>
+      <div id="reviewStatus" class="review-status hidden"><div class="spinner"></div> Printing...</div>
     </div>
 
     <script src="js/index.js"></script>
