@@ -26,6 +26,21 @@
       <p class="shortcut-hint">Press <strong id="spaceKey" class="kbd-key">Space</strong> to take photo</p>
     </div>
 
+    <div id="reviewScreen" class="overlay-screen hidden">
+      <img id="reviewImage" />
+      <div id="reviewControls" class="review-controls">
+        <div class="review-btn-group">
+          <button id="printButton" class="review-btn print-btn">Print</button>
+          <p class="shortcut-hint">Press <strong id="enterKey" class="kbd-key">Enter</strong> to print</p>
+        </div>
+        <div class="review-btn-group">
+          <button id="newPhotoButton" class="review-btn new-photo-btn">New Photo</button>
+          <p class="shortcut-hint">Press <strong id="reviewSpaceKey" class="kbd-key">Space</strong> for new photo</p>
+        </div>
+      </div>
+      <div id="reviewStatus" class="review-status hidden">Printing...</div>
+    </div>
+
     <script src="js/index.js"></script>
   </body>
 </html>
